@@ -1,0 +1,11 @@
+python==3.6
+scikit-learn
+pandas
+numpy
+scipy
+matplotlib
+seaborn
+ipykernel
+catboost
+lightgbm
+hyperopt
