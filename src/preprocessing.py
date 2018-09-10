@@ -176,21 +176,17 @@ as:
     test.sparse
 """
 
-def create_4way_interractions(path=""):
+def create_2way_interractions(path=""):
 
-    train_df=pd.read_pickle(path + "train_preproc_1_.pickle")
-    test_df=pd.read_pickle(path + "test_preproc_1_.pickle")
-#    train_df.drop("ROLE_CODE", axis=1, inplace=True)
-#    test_df.drop("ROLE_CODE", axis=1, inplace=True)
+    train_df=pd.read_pickle(path + "train_preproc_rare.pickle")
+    test_df=pd.read_pickle(path + "test_preproc_rare.pickle")
 
     y=np.array(train_df['target'])
     train_df.drop("target", axis=1, inplace=True)
-#    test_df.drop("id", axis=1, inplace=True)
+
 
 
     cat_columns = list(train_df.select_dtypes(include=['int8', 'int16', 'int32']).columns)
-    for quanti_int in ['CONTRAT_TARIF', 'PRIX_FACTURE']:
-        cat_columns.remove(quanti_int)
 
     cat_columns_idx = [train_df.columns.get_loc(cat) for cat in cat_columns]
     cat_columns = [cat_columns[k] for k in range(0,len(cat_columns))] # ??
@@ -266,49 +262,49 @@ def create_4way_interractions(path=""):
                     train_df.drop(name1, inplace=True,axis=1)
                     test_df.drop(name1, inplace=True,axis=1)
                     cat_columns_idx = cat_columns_idx[:-1]
-
-
-    for j1 in range(0,len(cat_columns)):
-        for j2 in range(j1+1,len(cat_columns)):
-            for j3 in range(j2+1,len(cat_columns)):
-                name1=cat_columns[j1] + "_plus_" + cat_columns[j2]+ "_plus_" + cat_columns[j3]
-                cols.append(name1)
-
-                train_df[name1]=train_df[cat_columns[j1]].apply(lambda x:str(x)) + "_" + train_df[cat_columns[j2]].apply(lambda x:str(x))+ "_" + train_df[cat_columns[j3]].apply(lambda x:str(x))
-                test_df[name1]=test_df[cat_columns[j1]].apply(lambda x:str(x))+ "_" + test_df[cat_columns[j2]].apply(lambda x:str(x)) + "_" + test_df[cat_columns[j3]].apply(lambda x:str(x))
-                cat_columns_idx.append(train_df.columns.get_loc(name1))
-
-                lbl = LabelEncoder()
-                lbl.fit(list(train_df[name1].values) + list(test_df[name1].values))
-                train_df[name1] = lbl.transform(list(train_df[name1].values))
-                test_df[name1] = lbl.transform(list(test_df[name1].values))
-
-                mean_auc=0
-                X=np.array(train_df)
-                i=0 # iterator counter
-                for train_index, test_index in kfolder:
-                        X_train, X_cv = np.array(X)[train_index], np.array(X)[test_index]
-                        y_train, y_cv = np.array(y)[train_index], np.array(y)[test_index]
-                        one=OneHotEncoder(handle_unknown='ignore', categorical_features=cat_columns_idx)
-                        one.fit(X_train)
-                        X_train=one.transform(X_train)
-                        X_cv=one.transform(X_cv)
-                        model.fit(X_train,y_train)
-                        preds=model.predict_proba(X_cv)[:,1]
-                        auc=roc_auc_score(y_cv,preds)
-                        print (" %s fold %d/%d auc %f " % (name1,i+1,5,auc))
-                        mean_auc+=auc
-                        i+=1
-                mean_auc/=5
-                if (mean_auc>grand_auc+0.00001):
-                    print (" %s will remain fold new Auc %f versus old Auc %f " % (name1,mean_auc,grand_auc))
-                    grand_auc=mean_auc
-                    newcols.append(name1)
-                else :
-                    print("dropping %s as %f is NOT big enough to %f " %  (name1,mean_auc,grand_auc))
-                    train_df.drop(name1, inplace=True,axis=1)
-                    test_df.drop(name1, inplace=True,axis=1)
-                    cat_columns_idx = cat_columns_idx[:-1]
+    #
+    #
+    # for j1 in range(0,len(cat_columns)):
+    #     for j2 in range(j1+1,len(cat_columns)):
+    #         for j3 in range(j2+1,len(cat_columns)):
+    #             name1=cat_columns[j1] + "_plus_" + cat_columns[j2]+ "_plus_" + cat_columns[j3]
+    #             cols.append(name1)
+    #
+    #             train_df[name1]=train_df[cat_columns[j1]].apply(lambda x:str(x)) + "_" + train_df[cat_columns[j2]].apply(lambda x:str(x))+ "_" + train_df[cat_columns[j3]].apply(lambda x:str(x))
+    #             test_df[name1]=test_df[cat_columns[j1]].apply(lambda x:str(x))+ "_" + test_df[cat_columns[j2]].apply(lambda x:str(x)) + "_" + test_df[cat_columns[j3]].apply(lambda x:str(x))
+    #             cat_columns_idx.append(train_df.columns.get_loc(name1))
+    #
+    #             lbl = LabelEncoder()
+    #             lbl.fit(list(train_df[name1].values) + list(test_df[name1].values))
+    #             train_df[name1] = lbl.transform(list(train_df[name1].values))
+    #             test_df[name1] = lbl.transform(list(test_df[name1].values))
+    #
+    #             mean_auc=0
+    #             X=np.array(train_df)
+    #             i=0 # iterator counter
+    #             for train_index, test_index in kfolder:
+    #                     X_train, X_cv = np.array(X)[train_index], np.array(X)[test_index]
+    #                     y_train, y_cv = np.array(y)[train_index], np.array(y)[test_index]
+    #                     one=OneHotEncoder(handle_unknown='ignore', categorical_features=cat_columns_idx)
+    #                     one.fit(X_train)
+    #                     X_train=one.transform(X_train)
+    #                     X_cv=one.transform(X_cv)
+    #                     model.fit(X_train,y_train)
+    #                     preds=model.predict_proba(X_cv)[:,1]
+    #                     auc=roc_auc_score(y_cv,preds)
+    #                     print (" %s fold %d/%d auc %f " % (name1,i+1,5,auc))
+    #                     mean_auc+=auc
+    #                     i+=1
+    #             mean_auc/=5
+    #             if (mean_auc>grand_auc+0.00001):
+    #                 print (" %s will remain fold new Auc %f versus old Auc %f " % (name1,mean_auc,grand_auc))
+    #                 grand_auc=mean_auc
+    #                 newcols.append(name1)
+    #             else :
+    #                 print("dropping %s as %f is NOT big enough to %f " %  (name1,mean_auc,grand_auc))
+    #                 train_df.drop(name1, inplace=True,axis=1)
+    #                 test_df.drop(name1, inplace=True,axis=1)
+    #                 cat_columns_idx = cat_columns_idx[:-1]
     #
     # for j1 in range(0,len(cat_columns)):
     #     for j2 in range(j1+1,len(cat_columns)):
@@ -647,7 +643,76 @@ def create_likelihoods_with_counts(path=""):
 
     print("done")
 
+
+
+def create_interractions(train, test, path=""):
+
+    train_df=pd.read_pickle(path + train)
+    test_df=pd.read_pickle(path + test)
+#    train_df.drop("ROLE_CODE", axis=1, inplace=True)
+#    test_df.drop("ROLE_CODE", axis=1, inplace=True)
+
+    y=np.array(train_df['target'])
+#    train_df.drop("target", axis=1, inplace=True)
+#    test_df.drop("id", axis=1, inplace=True)
+
+
+    cat_columns = list(train_df.select_dtypes(include=['category', 'bool']).columns)
+    cat_columns.remove('target')
+
+    cat_columns = [cat_columns[k] for k in range(0,len(cat_columns))] # ??
+
+    print("**************** 2 ways interactions ****************")
+    for j1 in range(0,len(cat_columns)):
+        for j2 in range(j1+1,len(cat_columns)):
+                name1=cat_columns[j1] + "_plus_" + cat_columns[j2]
+                print(name1)
+
+                train_df[name1]=train_df[cat_columns[j1]].astype(str) + "_" + train_df[cat_columns[j2]].astype(str)
+                test_df[name1]=test_df[cat_columns[j1]].astype(str)+ "_" + test_df[cat_columns[j2]].astype(str)
+
+                train_df[name1] = train_df[name1].astype('category')
+                test_df[name1] = test_df[name1].astype('category')
+                test_df[name1] = test_df[name1].cat.set_categories(train_df[name1].cat.categories)
+
+    # print("**************** 3 ways interactions ****************")
+    # for j1 in range(0,len(cat_columns)):
+    #     for j2 in range(j1+1,len(cat_columns)):
+    #         for j3 in range(j2+1,len(cat_columns)):
+    #             name1=cat_columns[j1] + "_plus_" + cat_columns[j2]+ "_plus_" + cat_columns[j3]
+    #             print(name1)
+    #
+    #             train_df[name1]=train_df[cat_columns[j1]].astype(str) + "_" + train_df[cat_columns[j2]].astype(str)+ "_" + train_df[cat_columns[j3]].astype(str)
+    #             test_df[name1]=test_df[cat_columns[j1]].astype(str)+ "_" + test_df[cat_columns[j2]].astype(str) + "_" + test_df[cat_columns[j3]].astype(str)
+    #
+    #             train_df[name1] = train_df[name1].astype('category')
+    #             test_df[name1] = test_df[name1].astype('category')
+    #             test_df[name1] = test_df[name1].cat.set_categories(train_df[name1].cat.categories)
+
+    # print("**************** 4 ways interactions ****************")
+    # for j1 in range(0,len(cat_columns)):
+    #     for j2 in range(j1+1,len(cat_columns)):
+    #         for j3 in range(j2+1,len(cat_columns)):
+    #             for j4 in range(j3+1,len(cat_columns)):
+    #                  name1=cat_columns[j1] + "_plus_" + cat_columns[j2]+ "_plus_" + cat_columns[j3]+ "_plus_" + cat_columns[j4]
+    #
+    #                  train_df[name1]=train_df[cat_columns[j1]].astype(str) + "_" + train_df[cat_columns[j2]].astype(str)+ "_" + train_df[cat_columns[j3]].astype(str)+ "_" + train_df[cat_columns[j4]].astype(str)
+    #                  test_df[name1]=test_df[cat_columns[j1]].astype(str)+ "_" + test_df[cat_columns[j2]].astype(str) + "_" + test_df[cat_columns[j3]].astype(str) + "_" + test_df[cat_columns[j4]].astype(str)
+    #
+    #                  train_df[name1] = train_df[name1].astype('category')
+    #                  test_df[name1] = test_df[name1].astype('category')
+    #                  test_df[name1] = test_df[name1].cat.set_categories(train_df[name1].cat.categories)
+
+    #train_df.to_csv("trainid.csv",index=False)
+    #test_df.to_csv("testid.csv",index=False)
+    train_df.to_pickle("interactions_" + train)
+    test_df.to_pickle("interactions_" + test)
+
+
+
 if __name__ == '__main__':
 ############ code runs here ############
-    create_4way_interractions(path='../data/preproc/') # compute 4way interractions
+#    create_interractions("train_preproc.pickle", "test_preproc.pickle", path='../data/preproc/') # compute 4way interractions
+#    create_interractions("train_preproc_rare.pickle", "test_preproc_rare.pickle", path='../data/preproc/')
+    create_2way_interractions(path='../data/preproc/')
     # create_likelihoods_with_counts()  # compute likelihoods and counts per fold and print 5 pairs of train/cv files

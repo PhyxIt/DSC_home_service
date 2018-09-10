@@ -128,12 +128,12 @@ def nature_code_split(df):
 
 def add_dates_features(data):
     data['age_installation'] = (data['CRE_DATE_GZL'] - data['INSTALL_DATE']).dt.days // 365
-    data['mois_appel'] = data['CRE_DATE_GZL'].dt.month
+    data['mois_appel'] = data['CRE_DATE_GZL'].dt.month.astype('category')
     data['joursemaine_appel'] = data['CRE_DATE_GZL'].map(lambda x: x.isoweekday()).astype('category')
-    data['jour_appel'] = data['CRE_DATE_GZL'].dt.day
-    data['mois_intervention'] = data['SCHEDULED_START_DATE'].dt.month
+    data['jour_appel'] = data['CRE_DATE_GZL'].dt.day.astype('category')
+    data['mois_intervention'] = data['SCHEDULED_START_DATE'].dt.month.astype('category')
     data['joursemaine_intervention'] = data['SCHEDULED_START_DATE'].map(lambda x: x.isoweekday()).astype('category')
-    data['jour_intervention'] = data['SCHEDULED_START_DATE'].dt.day
+    data['jour_intervention'] = data['SCHEDULED_START_DATE'].dt.day.astype('category')
     data['duree_avant_intervention'] = (data['SCHEDULED_START_DATE'] - data['CRE_DATE_GZL']).dt.days
     data['duree_prevue'] = (data['SCHEDULED_END_DATE'] - data['SCHEDULED_START_DATE']).dt.days
     data['temps_depuis_debut_contrat'] = (data['CRE_DATE_GZL'] - data['DATE_DEBUT']).dt.days
