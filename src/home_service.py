@@ -166,10 +166,10 @@ class CategoriesDroper(BaseEstimator, TransformerMixin):
         for column in self.columns:
             _df[column] = _df[column].cat.set_categories(self.categories_dict[column])
             try:
-                _df[column] = _df[column].fillna('NAN')
+                _df[column] = _df[column].fillna('RARE')
             except ValueError as e:
-                _df[column] = _df[column].cat.add_categories(['NAN'])
-                _df[column] = _df[column].fillna('NAN')
+                _df[column] = _df[column].cat.add_categories(['RARE'])
+                _df[column] = _df[column].fillna('RARE')
         return _df
 
 def add_categories_in_columns(df, columns, categories=['NAN']):
